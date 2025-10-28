@@ -9,8 +9,11 @@ export interface PlantAnalysis {
   isColorChangingFlower: boolean;
   diagnosis: string;
   recommendations: string[];
+  harvestInfoSummary?: string;
   harvestInfo?: string;
+  repottingInfoSummary?: string;
   repottingInfo?: string;
+  pruningInfoSummary?: string;
   pruningInfo?: string;
   colorChangeGuide?: {
     toBlue: string;

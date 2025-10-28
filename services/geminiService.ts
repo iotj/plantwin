@@ -58,13 +58,25 @@ const responseSchema = {
       },
       description: "식물을 건강하게 관리하기 위한 구체적인 방법 목록 (물주기, 햇빛, 비료, 해충 방제 등).",
     },
+    harvestInfoSummary: {
+        type: Type.STRING,
+        description: "수확 가능한 작물인 경우에만 harvestInfo의 내용을 '수확 가능', '2주 후 수확'과 같이 간결하게 요약합니다. 수확 불가능한 식물인 경우 반드시 null을 반환합니다.",
+    },
     harvestInfo: {
         type: Type.STRING,
-        description: "식물이 과일이나 채소일 경우, 예상 수확 시기 및 방법에 대한 정보. 해당사항 없으면 빈 문자열이나 null을 반환.",
+        description: "식물이 과일이나 채소 등 수확 가능한 작물인 경우에만, 예상 수확 시기 및 방법에 대한 상세 정보를 제공합니다. 수확 불가능한 식물인 경우 반드시 null을 반환합니다.",
+    },
+    repottingInfoSummary: {
+        type: Type.STRING,
+        description: "repottingInfo의 내용을 '분갈이 필요', '6개월 후 분갈이 권장'과 같이 간결하게 요약합니다. 분갈이가 필요하지 않은 경우 반드시 null을 반환합니다.",
     },
     repottingInfo: {
         type: Type.STRING,
         description: "사진 속 식물 크기와 화분 크기를 비교하여 분갈이가 필요한지 여부와 필요하다면 그 이유에 대한 정보. 해당사항 없으면 빈 문자열이나 null을 반환.",
+    },
+    pruningInfoSummary: {
+        type: Type.STRING,
+        description: "가지치기가 필요한 경우에만 '가지치기 필요'라고 텍스트를 제공합니다. 필요하지 않은 경우 반드시 null을 반환합니다.",
     },
     pruningInfo: {
         type: Type.STRING,
@@ -86,7 +98,7 @@ const responseSchema = {
         description: "만약 식물이 꽃이 피는 종류인데 사진에 꽃이 없는 경우, 필 수 있는 잠재적인 꽃 색깔을 3가지 제안 (예: ['분홍색', '흰색', '노란색']). 해당사항 없으면 빈 배열이나 null을 반환.",
     },
   },
-  required: ["plantName", "commonKoreanName", "scientificName", "flowerLanguage", "healthStatus", "hydrationInfo", "sunlightInfo", "soilPhInfo", "isColorChangingFlower", "diagnosis", "recommendations", "harvestInfo", "repottingInfo", "pruningInfo", "colorChangeGuide", "potentialFlowerColors"],
+  required: ["plantName", "healthStatus", "isColorChangingFlower", "diagnosis", "recommendations"],
 };
 
 export const getPlantAnalysis = async (
@@ -112,7 +124,7 @@ export const getPlantAnalysis = async (
       model: "gemini-2.5-flash",
       contents: { parts: [imagePart, textPart] },
       config: {
-        systemInstruction: "당신은 식물학자이자 정원 가꾸기 전문가입니다. 제공된 식물 사진과 사용자의 질문을 분석하여 JSON 형식에 맞춰 응답해주세요. 식물 이름은 가장 대표적인 한국어 이름으로, 학명과 함께 알려주세요. 만약 한국에서 흔히 불리는 다른 이름(별칭)이 있다면 그것도 알려주세요. 만약 식물이 꽃이라면, 꽃말도 함께 알려주세요. 그리고 다음 사항들을 상세히 진단해주세요: 1. 수분 상태: 잎의 처짐이나 흙의 상태 같은 시각적 단서로 물 부족, 적절, 과습 상태를 판단. 2. 일조량 상태: 사진의 빛, 그림자, 식물의 웃자람 여부 등을 분석하여 일조량이 부족한지, 충분한지, 또는 과다한지 판단. 3. 분갈이 필요성: 사진에 보이는 식물과 화분 크기를 비교하여 분갈이가 필요한지 판단합니다. 특히, 뿌리가 화분 위 흙을 뚫고 나오거나 화분 아래 배수구멍으로 빠져나오는지를 중요한 판단 기준으로 삼아주세요. 4. 수확 정보: 수확 가능한 작물이라면 예상 수확 시기와 방법을 설명. 5. 가지치기 필요성: 식물의 형태를 보고 가지치기가 필요한지 여부와 방법을 설명. 6. 색 변화 가능성: 사진 속 식물이 수국처럼 토양 산도에 따라 꽃 색이 변하는 식물인지 판단해주세요. 7. 토양 산도 추정: 만약 '색 변화 가능성'이 참이라면, 현재 보이는 꽃의 색을 근거로 토양의 산성도를 추정해주세요 (예: 파란색이면 산성, 분홍색이면 알칼리성). 8. 토양 산도 조절 가이드: '색 변화 가능성'이 참이라면, 사진 속 화분 크기를 추정하고 그에 맞춰 흙의 산도를 조절하는 방법을 구체적으로 알려주세요. 파란색 꽃을 위한 방법(예: 황산알루미늄 양)과 분홍색 꽃을 위한 방법(예: 정원용 석회 양)을 각각 제공해주세요. 9. 잠재적 꽃 색상 예측: 식물이 꽃 피는 종류인데 현재 사진에 꽃이 없다면, 앞으로 필 수 있는 대표적인 꽃 색상을 최대 3가지 제안해주세요.",
+        systemInstruction: "당신은 식물학자이자 정원 가꾸기 전문가입니다. 제공된 식물 사진과 사용자의 질문을 분석하여 JSON 형식에 맞춰 응답해주세요. 식물 이름은 가장 대표적인 한국어 이름으로, 학명과 함께 알려주세요. 만약 한국에서 흔히 불리는 다른 이름(별칭)이 있다면 그것도 알려주세요. 만약 식물이 꽃이라면, 꽃말도 함께 알려주세요. 그리고 다음 사항들을 상세히 진단해주세요: 1. 수분 상태: 잎의 처짐이나 흙의 상태 같은 시각적 단서로 물 부족, 적절, 과습 상태를 판단. 2. 일조량 상태: 사진의 빛, 그림자, 식물의 웃자람 여부 등을 분석하여 일조량이 부족한지, 충분한지, 또는 과다한지 판단. 3. 분갈이 필요성: 사진에 보이는 식물과 화분 크기를 비교하여 분갈이가 필요한지 판단합니다. 특히, 뿌리가 화분 위 흙을 뚫고 나오거나 화분 아래 배수구멍으로 빠져나오는지를 중요한 판단 기준으로 삼아주세요. 판단 결과를 바탕으로 repottingInfoSummary 필드에 '분갈이 필요', '6개월 후 분갈이 권장'처럼 간결한 요약을 제공해주세요. 분갈이가 필요하지 않은 경우, repottingInfo와 repottingInfoSummary 필드에 null을 반환하세요. 4. 수확 정보: 식물이 과일, 채소 등 수확 가능한 작물인 경우에만 예상 수확 시기와 방법을 설명하고 그 내용을 '수확 가능' 또는 '2주 후 수확'과 같이 간결하게 요약하여 harvestInfoSummary 필드에 제공해주세요. 수확할 수 없는 식물이라면 harvestInfo와 harvestInfoSummary 필드 모두 반드시 null을 반환해야 합니다. '해당 없음'과 같은 텍스트를 반환하지 마세요. 5. 가지치기 필요성: 식물의 형태를 보고 가지치기가 필요한지 여부와 방법을 설명. 만약 가지치기가 필요하다고 판단되면 pruningInfoSummary 필드에 '가지치기 필요'라는 텍스트를 제공해주세요. 필요하지 않은 경우, pruningInfo와 pruningInfoSummary 필드에 null을 반환하세요. 6. 색 변화 가능성: 사진 속 식물이 수국처럼 토양 산도에 따라 꽃 색이 변하는 식물인지 판단해주세요. 7. 토양 산도 추정: 만약 '색 변화 가능성'이 참이라면, 현재 보이는 꽃의 색을 근거로 토양의 산성도를 추정해주세요 (예: 파란색이면 산성, 분홍색이면 알칼리성). 8. 토양 산도 조절 가이드: '색 변화 가능성'이 참이라면, 사진 속 화분 크기를 추정하고 그에 맞춰 흙의 산도를 조절하는 방법을 구체적으로 알려주세요. 파란색 꽃을 위한 방법(예: 황산알루미늄 양)과 분홍색 꽃을 위한 방법(예: 정원용 석회 양)을 각각 제공해주세요. 9. 잠재적 꽃 색상 예측: 식물이 꽃 피는 종류인데 현재 사진에 꽃이 없다면, 앞으로 필 수 있는 대표적인 꽃 색상을 최대 3가지 제안해주세요.",
         responseMimeType: "application/json",
         responseSchema: responseSchema,
       },

@@ -317,7 +317,10 @@ const PlantDetail: React.FC<PlantDetailProps> = ({ plant, onBack, onUpdatePlant 
              </div>
              {expandedEntryId === entry.id && (
                 <div className="p-4 border-t border-zinc-800 animate-fade-in">
-                    <AnalysisResult analysis={entry.analysis} />
+                    <AnalysisResult 
+                        analysis={entry.analysis} 
+                        imageSrc={`data:${entry.mimeType};base64,${entry.imageBase64}`}
+                    />
                 </div>
              )}
           </div>

@@ -7,7 +7,7 @@ import AnalysisResult from './components/ToolCard';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorDisplay from './components/ErrorDisplay';
 import ChatInterface from './components/ChatInterface';
-import CompanionPlantSidebar from './components/CompanionPlantSidebar';
+import CompanionPlantHeader from './components/CompanionPlantSidebar';
 import PlantDetail from './components/PlantDetail';
 import { getPlants, savePlants } from './services/storageService';
 import Menu from './components/Menu';
@@ -313,13 +313,13 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black font-sans flex">
-      <CompanionPlantSidebar 
+    <div className="min-h-screen bg-black font-sans">
+      <CompanionPlantHeader 
         plants={plants} 
         onSelectPlant={handleSelectPlant} 
         activePlantId={selectedPlantId}
       />
-      <div className="flex-grow transition-all duration-300 pl-24">
+      <div className="pt-28">
         <div className="container mx-auto px-4 py-8 max-w-2xl relative">
           <button
             onClick={handleMenuClick}
@@ -425,6 +425,7 @@ const App: React.FC = () => {
                 {analysis && (
                   <div className="space-y-8">
                     <AnalysisResult
+                      imageSrc={imagePreview}
                       analysis={analysis}
                       onColorChange={handleColorChange}
                       editedImage={editedImage}

@@ -3,6 +3,7 @@ import { PlantAnalysis } from '../types';
 
 interface AnalysisResultProps {
   analysis: PlantAnalysis;
+  imageSrc?: string;
   onColorChange?: (color: string) => void;
   editedImage?: string | null;
   isEditing?: boolean;
@@ -22,19 +23,17 @@ const downloadImage = (base64Image: string, fileName: string) => {
   document.body.removeChild(link);
 };
 
-const HealthStatusBadge: React.FC<{ status: string }> = ({ status }) => {
-  const statusStyles: { [key: string]: string } = {
-    '건강함': 'bg-emerald-500/10 text-emerald-400',
-    '주의 필요': 'bg-yellow-500/10 text-yellow-400',
-    '아픔': 'bg-red-500/10 text-red-400',
-  };
-  const style = statusStyles[status] || 'bg-zinc-700 text-zinc-300';
-  return (
-    <span className={`px-2.5 py-1 text-xs font-medium rounded-full inline-flex items-center gap-1.5 ${style}`}>
-      {status}
-    </span>
-  );
-};
+const StatusItem: React.FC<{ icon: React.ReactNode; label: string; value: string; colorClass: string }> = ({ icon, label, value, colorClass }) => (
+    <div className="flex items-center gap-3">
+        <div className={`p-2 rounded-full bg-zinc-800/60 ${colorClass}`}>
+            {icon}
+        </div>
+        <div>
+            <p className="text-xs text-zinc-400">{label}</p>
+            <p className={`text-sm font-semibold ${colorClass}`}>{value}</p>
+        </div>
+    </div>
+);
 
 const InfoBadge: React.FC<{ icon: React.ReactNode; text: string; color: string }> = ({ icon, text, color }) => {
   return (
@@ -48,6 +47,7 @@ const InfoBadge: React.FC<{ icon: React.ReactNode; text: string; color: string }
 
 const AnalysisResult: React.FC<AnalysisResultProps> = ({ 
     analysis, 
+    imageSrc,
     onColorChange, 
     editedImage, 
     isEditing, 
@@ -60,30 +60,95 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
   const [visibleGuide, setVisibleGuide] = useState<'blue' | 'pink' | null>(null);
   const showBloomingFeature = analysis.potentialFlowerColors && analysis.potentialFlowerColors.length > 0;
 
-  const getHydrationBadgeProps = (info: string) => {
-    let color = 'bg-blue-500/10 text-blue-400';
-    if (info.includes('부족')) color = 'bg-yellow-500/10 text-yellow-400';
-    else if (info.includes('과습')) color = 'bg-red-500/10 text-red-400';
-    return {
-      icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M10 1a5.5 5.5 0 00-5.465 6.435L10 18l5.465-10.565A5.5 5.5 0 0010 1zm0 3.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" /></svg>,
-      text: info,
-      color: color,
-    };
+  const healthStatusStyles: { [key: string]: string } = {
+    '건강함': 'text-emerald-400',
+    '주의 필요': 'text-yellow-400',
+    '아픔': 'text-red-400',
+  };
+  const healthStatusColor = healthStatusStyles[analysis.healthStatus] || 'text-zinc-300';
+
+  const getHydrationTextColor = (info: string | undefined | null) => {
+    if (!info) return 'text-zinc-300';
+    if (info.includes('부족')) return 'text-yellow-400';
+    if (info.includes('과습')) return 'text-red-400';
+    return 'text-blue-400';
   };
 
-  const getSunlightBadgeProps = (info: string) => {
-    let color = 'bg-yellow-500/10 text-yellow-400';
-    if (info.includes('부족')) color = 'bg-zinc-700 text-zinc-400';
-    else if (info.includes('과다') || info.includes('강함')) color = 'bg-orange-500/10 text-orange-400';
-    return {
-      icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 4.343a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.192 9.192a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM4.343 4.343a.75.75 0 011.06 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.192 9.192a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 012 10zM15 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 0115 10z" /></svg>,
-      text: info,
-      color: color,
-    };
+  const getSunlightTextColor = (info: string | undefined | null) => {
+    if (!info) return 'text-zinc-300';
+    if (info.includes('부족')) return 'text-zinc-400';
+    if (info.includes('과다') || info.includes('강함')) return 'text-orange-400';
+    return 'text-yellow-400';
   };
 
   return (
     <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 shadow-2xl shadow-black/20 animate-fade-in space-y-6">
+      {imageSrc && (
+          <>
+              <div className="flex flex-col md:flex-row gap-6">
+                  <div className="md:w-1/2 w-full">
+                      <img src={imageSrc} alt={analysis.plantName} className="rounded-xl object-cover w-full aspect-square" />
+                  </div>
+                  <div className="md:w-1/2 w-full flex flex-col justify-center space-y-4">
+                      <h3 className="text-lg font-semibold text-zinc-100 border-b border-zinc-700 pb-2 mb-2">주요 상태 요약</h3>
+                      
+                      <StatusItem 
+                          icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path d="M10 2a.75.75 0 01.75.75v.518a4.5 4.5 0 013.475 2.065l.348.519a.75.75 0 01-.368 1.033l-1.35.676a.75.75 0 01-.812-.045l-.473-.354a2.992 2.992 0 00-3.216 0l-.473.354a.75.75 0 01-.812.045l-1.35-.676a.75.75 0 01-.368-1.033l.348-.52A4.5 4.5 0 019.25 3.268V2.75A.75.75 0 0110 2zM5.003 7.23a.75.75 0 01.623.869l-.348 1.044a.75.75 0 01-1.033.368l-.676-1.35a.75.75 0 01.368-1.033l1.044-.348a.75.75 0 01.869.623zM14.997 7.23a.75.75 0 01.869-.623l1.044.348a.75.75 0 01.368 1.033l-.676 1.35a.75.75 0 01-1.033-.368l-.348-1.044a.75.75 0 01.623-.869zM10 12.5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5a.75.75 0 01.75-.75z" /></svg>}
+                          label="건강 상태"
+                          value={analysis.healthStatus} 
+                          colorClass={healthStatusColor}
+                      />
+
+                      {analysis.hydrationInfo && (
+                           <StatusItem 
+                              icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M10 1a5.5 5.5 0 00-5.465 6.435L10 18l5.465-10.565A5.5 5.5 0 0010 1zm0 3.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" /></svg>}
+                              label="수분 상태"
+                              value={analysis.hydrationInfo} 
+                              colorClass={getHydrationTextColor(analysis.hydrationInfo)}
+                          />
+                      )}
+
+                      {analysis.sunlightInfo && (
+                          <StatusItem 
+                              icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 4.343a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.192 9.192a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM4.343 4.343a.75.75 0 011.06 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.192 9.192a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 012 10zM15 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 0115 10z" /></svg>}
+                              label="일조량"
+                              value={analysis.sunlightInfo} 
+                              colorClass={getSunlightTextColor(analysis.sunlightInfo)}
+                          />
+                      )}
+                      
+                      {analysis.harvestInfoSummary && (
+                        <StatusItem 
+                            icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zM4.5 8.5a.75.75 0 000 1.5h11a.75.75 0 000-1.5h-11zM10 12a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V12.75A.75.75 0 0110 12z" clipRule="evenodd" /></svg>}
+                            label="수확 정보"
+                            value={analysis.harvestInfoSummary} 
+                            colorClass="text-purple-400"
+                        />
+                      )}
+
+                      {analysis.repottingInfoSummary && (
+                        <StatusItem 
+                            icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg>}
+                            label="분갈이 정보"
+                            value={analysis.repottingInfoSummary} 
+                            colorClass="text-cyan-400"
+                        />
+                      )}
+
+                      {analysis.pruningInfoSummary && (
+                        <StatusItem 
+                            icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 011.622-3.385m5.043.025a15.998 15.998 0 001.622-3.385m3.388 1.62a15.998 15.998 0 00-1.622-3.385m-5.043-.025a15.998 15.998 0 01-3.388-1.621m7.447 1.027a3 3 0 00-5.78-1.128 2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 008.4 2.245c0 .399-.078.78-.22 1.128zm0 0a15.998 15.998 0 00-3.388 1.622m5.043.025a15.998 15.998 0 01-1.622 3.385m-5.043-.025a15.998 15.998 0 00-1.622 3.385m-3.388-1.622a15.998 15.998 0 001.622 3.385" /></svg>}
+                            label="가지치기 정보"
+                            value={analysis.pruningInfoSummary} 
+                            colorClass="text-orange-400"
+                        />
+                      )}
+                  </div>
+              </div>
+              <div className="border-t border-zinc-800"></div>
+          </>
+      )}
+
       <header className="space-y-4">
         <div>
           <p className="text-emerald-400 font-semibold text-sm mb-1">AI가 분석한 식물 종류</p>
@@ -109,11 +174,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
         )}
 
         <div className="flex items-center gap-2 flex-wrap">
-           <HealthStatusBadge status={analysis.healthStatus} />
-           {analysis.hydrationInfo && <InfoBadge {...getHydrationBadgeProps(analysis.hydrationInfo)} />}
-           {analysis.sunlightInfo && <InfoBadge {...getSunlightBadgeProps(analysis.sunlightInfo)} />}
            {analysis.soilPhInfo && <InfoBadge icon={<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5l.75 4.5a2.25 2.25 0 002.246 2.003h12.008a2.25 2.25 0 002.246-2.003l.75-4.5M3 13.5V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v6" /><path strokeLinecap="round" strokeLinejoin="round" d="M5.25 8.25h13.5" /></svg>} text={analysis.soilPhInfo} color="bg-amber-500/10 text-amber-400" />}
-           {analysis.harvestInfo && <InfoBadge icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zM4.5 8.5a.75.75 0 000 1.5h11a.75.75 0 000-1.5h-11zM10 12a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V12.75A.75.75 0 0110 12z" clipRule="evenodd" /></svg>} text="수확 가능" color="bg-purple-500/10 text-purple-400" />}
         </div>
       </header>
       
@@ -123,7 +184,7 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </div>
 
       {[
-        { info: analysis.harvestInfo, title: '수확 정보', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0h18M12 12.75h.008v.008H12v-.008Z" /></svg> },
+        { info: analysis.harvestInfo, title: '수확 정보', icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zM4.5 8.5a.75.75 0 000 1.5h11a.75.75 0 000-1.5h-11zM10 12a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V12.75A.75.75 0 0110 12z" clipRule="evenodd" /></svg> },
         { info: analysis.repottingInfo, title: '분갈이 필요성', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg> },
         { info: analysis.pruningInfo, title: '가지치기 필요성', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 011.622-3.385m5.043.025a15.998 15.998 0 001.622-3.385m3.388 1.62a15.998 15.998 0 00-1.622-3.385m-5.043-.025a15.998 15.998 0 01-3.388-1.621m7.447 1.027a3 3 0 00-5.78-1.128 2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 008.4 2.245c0 .399-.078.78-.22 1.128zm0 0a15.998 15.998 0 00-3.388 1.622m5.043.025a15.998 15.998 0 01-1.622 3.385m-5.043-.025a15.998 15.998 0 00-1.622 3.385m-3.388-1.622a15.998 15.998 0 001.622 3.385" /></svg> },
       ].map((section) => section.info && (
