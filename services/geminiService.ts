@@ -13,7 +13,11 @@ const responseSchema = {
   properties: {
     plantName: {
       type: Type.STRING,
-      description: "사진 속 식물의 이름.",
+      description: "사진 속 식물의 한국어 이름.",
+    },
+     flowerLanguage: {
+      type: Type.STRING,
+      description: "만약 식물이 꽃이라면, 한국에서의 꽃말(상징적 의미). (예: '사랑의 고백'). 해당사항 없으면 빈 문자열이나 null을 반환.",
     },
     healthStatus: {
       type: Type.STRING,
@@ -65,9 +69,16 @@ const responseSchema = {
             toBlue: { type: Type.STRING },
             toPink: { type: Type.STRING }
         }
-    }
+    },
+    potentialFlowerColors: {
+        type: Type.ARRAY,
+        items: {
+          type: Type.STRING,
+        },
+        description: "만약 식물이 꽃이 피는 종류인데 사진에 꽃이 없는 경우, 필 수 있는 잠재적인 꽃 색깔을 3가지 제안 (예: ['분홍색', '흰색', '노란색']). 해당사항 없으면 빈 배열이나 null을 반환.",
+    },
   },
-  required: ["plantName", "healthStatus", "hydrationInfo", "sunlightInfo", "soilPhInfo", "isColorChangingFlower", "diagnosis", "recommendations", "harvestInfo", "repottingInfo", "pruningInfo", "colorChangeGuide"],
+  required: ["plantName", "flowerLanguage", "healthStatus", "hydrationInfo", "sunlightInfo", "soilPhInfo", "isColorChangingFlower", "diagnosis", "recommendations", "harvestInfo", "repottingInfo", "pruningInfo", "colorChangeGuide", "potentialFlowerColors"],
 };
 
 export const getPlantAnalysis = async (
@@ -93,7 +104,7 @@ export const getPlantAnalysis = async (
       model: "gemini-2.5-flash",
       contents: { parts: [imagePart, textPart] },
       config: {
-        systemInstruction: "당신은 식물학자이자 정원 가꾸기 전문가입니다. 제공된 식물 사진과 사용자의 질문을 분석하여 식물의 종류, 건강 상태, 잠재적인 문제점, 그리고 구체적인 관리 방법을 상세히 진단해 주세요. 특히 다음 사항들을 분석하고 JSON 형식에 맞춰 응답해주세요: 1. 수분 상태: 잎의 처짐이나 흙의 상태 같은 시각적 단서로 물 부족, 적절, 과습 상태를 판단. 2. 일조량 상태: 사진의 빛, 그림자, 식물의 웃자람 여부 등을 분석하여 일조량이 부족한지, 충분한지, 또는 과다한지 판단. 3. 분갈이 필요성: 사진에 보이는 식물과 화분 크기를 비교하여 분갈이가 필요한지 판단. 4. 수확 정보: 수확 가능한 작물이라면 예상 수확 시기와 방법을 설명. 5. 가지치기 필요성: 식물의 형태를 보고 가지치기가 필요한지 여부와 방법을 설명. 6. 색 변화 가능성: 사진 속 식물이 수국처럼 토양 산도에 따라 꽃 색이 변하는 식물인지 판단해주세요. 7. 토양 산도 추정: 만약 '색 변화 가능성'이 참이라면, 현재 보이는 꽃의 색을 근거로 토양의 산성도를 추정해주세요 (예: 파란색이면 산성, 분홍색이면 알칼리성). 8. 토양 산도 조절 가이드: '색 변화 가능성'이 참이라면, 사진 속 화분 크기를 추정하고 그에 맞춰 흙의 산도를 조절하는 방법을 구체적으로 알려주세요. 파란색 꽃을 위한 방법(예: 황산알루미늄 양)과 분홍색 꽃을 위한 방법(예: 정원용 석회 양)을 각각 제공해주세요.",
+        systemInstruction: "당신은 식물학자이자 정원 가꾸기 전문가입니다. 제공된 식물 사진과 사용자의 질문을 분석하여 JSON 형식에 맞춰 응답해주세요. 식물 이름은 반드시 한국어로 알려주세요. 만약 식물이 꽃이라면, 꽃말도 함께 알려주세요. 그리고 다음 사항들을 상세히 진단해주세요: 1. 수분 상태: 잎의 처짐이나 흙의 상태 같은 시각적 단서로 물 부족, 적절, 과습 상태를 판단. 2. 일조량 상태: 사진의 빛, 그림자, 식물의 웃자람 여부 등을 분석하여 일조량이 부족한지, 충분한지, 또는 과다한지 판단. 3. 분갈이 필요성: 사진에 보이는 식물과 화분 크기를 비교하여 분갈이가 필요한지 판단합니다. 특히, 뿌리가 화분 위 흙을 뚫고 나오거나 화분 아래 배수구멍으로 빠져나오는지를 중요한 판단 기준으로 삼아주세요. 4. 수확 정보: 수확 가능한 작물이라면 예상 수확 시기와 방법을 설명. 5. 가지치기 필요성: 식물의 형태를 보고 가지치기가 필요한지 여부와 방법을 설명. 6. 색 변화 가능성: 사진 속 식물이 수국처럼 토양 산도에 따라 꽃 색이 변하는 식물인지 판단해주세요. 7. 토양 산도 추정: 만약 '색 변화 가능성'이 참이라면, 현재 보이는 꽃의 색을 근거로 토양의 산성도를 추정해주세요 (예: 파란색이면 산성, 분홍색이면 알칼리성). 8. 토양 산도 조절 가이드: '색 변화 가능성'이 참이라면, 사진 속 화분 크기를 추정하고 그에 맞춰 흙의 산도를 조절하는 방법을 구체적으로 알려주세요. 파란색 꽃을 위한 방법(예: 황산알루미늄 양)과 분홍색 꽃을 위한 방법(예: 정원용 석회 양)을 각각 제공해주세요. 9. 잠재적 꽃 색상 예측: 식물이 꽃 피는 종류인데 현재 사진에 꽃이 없다면, 앞으로 필 수 있는 대표적인 꽃 색상을 최대 3가지 제안해주세요.",
         responseMimeType: "application/json",
         responseSchema: responseSchema,
       },
@@ -151,5 +162,48 @@ export const changeFlowerColor = async (
         throw new Error(`AI 이미지 편집에 실패했습니다: ${error.message}`);
     }
     throw new Error("AI 이미지 편집에 실패했습니다. 알 수 없는 오류가 발생했습니다.");
+  }
+};
+
+export const generateBloomingImage = async (
+  base64Image: string,
+  mimeType: string,
+  plantName: string,
+  targetColor: string
+): Promise<string> => {
+  try {
+    const ai = getAi();
+    const imagePart = {
+      inlineData: {
+        data: base64Image,
+        mimeType,
+      },
+    };
+    const textPart = {
+      text: `이 사진은 꽃이 피지 않은 '${plantName}' 식물입니다. 사진 속 식물의 현재 잎 상태와 크기를 고려하여, 이 식물이 자연스럽게 성장한 후 '${targetColor}' 꽃을 피웠을 때의 모습을 사실적으로 생성해주세요. 꽃의 양과 크기는 식물의 현재 상태에 어울리도록 조절하여 과하게 보이지 않게 해주세요. 기존 잎, 줄기, 화분, 배경은 최대한 유지하되, 꽃과 조화를 이루는 자연스러운 성장 표현은 괜찮습니다.`,
+    };
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash-image',
+      contents: { parts: [imagePart, textPart] },
+      config: {
+        responseModalities: [Modality.IMAGE],
+      },
+    });
+
+    for (const part of response.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return part.inlineData.data;
+      }
+    }
+
+    throw new Error("AI가 이미지를 생성하지 못했습니다.");
+
+  } catch (error) {
+    console.error("Gemini 이미지 생성 중 오류 발생:", error);
+    if (error instanceof Error) {
+        throw new Error(`AI 이미지 생성에 실패했습니다: ${error.message}`);
+    }
+    throw new Error("AI 이미지 생성에 실패했습니다. 알 수 없는 오류가 발생했습니다.");
   }
 };

@@ -14,6 +14,8 @@ export interface PlantAnalysis {
     toBlue: string;
     toPink: string;
   };
+  potentialFlowerColors?: string[];
+  flowerLanguage?: string;
 }
 
 export interface DiaryEntry {
@@ -28,4 +30,9 @@ export interface Plant {
   id: string;
   name: string;
   entries: DiaryEntry[];
+}
+
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text: string;
 }

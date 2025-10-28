@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useRef } from 'react';
-import { getPlantAnalysis, changeFlowerColor } from './services/geminiService';
-import { PlantAnalysis } from './types';
+import { GoogleGenAI, Chat } from '@google/genai';
+import { getPlantAnalysis, changeFlowerColor, generateBloomingImage } from './services/geminiService';
+import { PlantAnalysis, ChatMessage } from './types';
 import Header from './components/Header';
 import AnalysisResult from './components/ToolCard';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorDisplay from './components/ErrorDisplay';
+import ChatInterface from './components/ChatInterface';
 
 const fileToGenerativePart = async (file: File) => {
   const base64EncodedDataPromise = new Promise<string>((resolve) => {
@@ -31,6 +33,19 @@ const App: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editError, setEditError] = useState<string | null>(null);
 
+  const [bloomingImages, setBloomingImages] = useState<Record<string, string>>({});
+  const [isGeneratingBloom, setIsGeneratingBloom] = useState<string | null>(null);
+  const [bloomError, setBloomError] = useState<Record<string, string>>({});
+
+  const [chatSession, setChatSession] = useState<Chat | null>(null);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [isChatLoading, setIsChatLoading] = useState<boolean>(false);
+
+  const resetChat = () => {
+    setChatSession(null);
+    setChatMessages([]);
+    setIsChatLoading(false);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,6 +57,10 @@ const App: React.FC = () => {
       setError(null);
       setEditedImage(null);
       setEditError(null);
+      setBloomingImages({});
+      setIsGeneratingBloom(null);
+      setBloomError({});
+      resetChat();
     }
   };
   
@@ -67,6 +86,24 @@ const App: React.FC = () => {
     }
   }, [imageFile]);
 
+  const handleGenerateBloom = useCallback(async (color: string) => {
+    if (!imageFile || !analysis?.plantName) return;
+
+    setIsGeneratingBloom(color);
+    setBloomError(prev => ({ ...prev, [color]: '' }));
+
+    try {
+        const { base64, mimeType } = await fileToGenerativePart(imageFile);
+        const newImageBase64 = await generateBloomingImage(base64, mimeType, analysis.plantName, color);
+        setBloomingImages(prev => ({ ...prev, [color]: newImageBase64 }));
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "꽃 피우기 중 알 수 없는 오류가 발생했습니다.";
+        setBloomError(prev => ({...prev, [color]: errorMessage}));
+    } finally {
+        setIsGeneratingBloom(null);
+    }
+  }, [imageFile, analysis]);
+
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,11 +116,31 @@ const App: React.FC = () => {
     setAnalysis(null);
     setEditedImage(null);
     setEditError(null);
+    setBloomingImages({});
+    setIsGeneratingBloom(null);
+    setBloomError({});
+    resetChat();
 
     try {
       const { base64, mimeType } = await fileToGenerativePart(imageFile);
       const result = await getPlantAnalysis(base64, mimeType, question);
       setAnalysis(result);
+
+      if (!process.env.API_KEY) {
+        throw new Error("API_KEY is not set in environment variables.");
+      }
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const chat = ai.chats.create({
+          model: 'gemini-2.5-flash',
+          config: {
+            systemInstruction: `당신은 사용자의 식물에 대한 전문가입니다. 사용자는 방금 자신의 식물에 대해 AI 진단을 받았습니다. 이제부터 이 진단 내용을 바탕으로 사용자의 추가 질문에 답변해주세요. 진단 정보: ${JSON.stringify(result)}`,
+          },
+      });
+      setChatSession(chat);
+      setChatMessages([
+          { role: 'model', text: '진단 결과를 바탕으로 궁금한 점이 더 있으신가요? 편하게 물어보세요! 예를 들어 "물은 며칠에 한 번 주는 게 좋을까?" 와 같이 질문할 수 있어요.' }
+      ]);
+
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -94,6 +151,24 @@ const App: React.FC = () => {
       setIsLoading(false);
     }
   }, [imageFile, question]);
+
+  const handleSendChatMessage = useCallback(async (message: string) => {
+    if (!chatSession) return;
+
+    setChatMessages(prev => [...prev, { role: 'user', text: message }]);
+    setIsChatLoading(true);
+
+    try {
+        const response = await chatSession.sendMessage({ message });
+        const modelResponse = response.text;
+        setChatMessages(prev => [...prev, { role: 'model', text: modelResponse }]);
+    } catch (err) {
+        const errorMessage = err instanceof Error ? `오류: ${err.message}` : "메시지 전송 중 오류가 발생했습니다.";
+        setChatMessages(prev => [...prev, { role: 'model', text: errorMessage }]);
+    } finally {
+        setIsChatLoading(false);
+    }
+  }, [chatSession]);
 
   return (
     <div className="min-h-screen bg-slate-900 font-sans">
@@ -154,13 +229,26 @@ const App: React.FC = () => {
           {isLoading && <LoadingSpinner />}
           {error && <ErrorDisplay message={error} />}
           {analysis && (
-            <AnalysisResult
-              analysis={analysis}
-              onColorChange={handleColorChange}
-              editedImage={editedImage}
-              isEditing={isEditing}
-              editError={editError}
-            />
+            <>
+              <AnalysisResult
+                analysis={analysis}
+                onColorChange={handleColorChange}
+                editedImage={editedImage}
+                isEditing={isEditing}
+                editError={editError}
+                onGenerateBloom={handleGenerateBloom}
+                bloomingImages={bloomingImages}
+                isGeneratingBloom={isGeneratingBloom}
+                bloomError={bloomError}
+              />
+              {chatSession && (
+                <ChatInterface 
+                  messages={chatMessages}
+                  onSendMessage={handleSendChatMessage}
+                  isLoading={isChatLoading}
+                />
+              )}
+            </>
           )}
           
         </main>
