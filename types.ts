@@ -1,5 +1,7 @@
 export interface PlantAnalysis {
   plantName: string;
+  commonKoreanName?: string;
+  scientificName?: string;
   healthStatus: string;
   hydrationInfo?: string;
   sunlightInfo?: string;

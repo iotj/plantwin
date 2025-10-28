@@ -171,13 +171,14 @@ const App: React.FC = () => {
   }, [chatSession]);
 
   return (
-    <div className="min-h-screen bg-slate-900 font-sans">
+    <div className="min-h-screen bg-black font-sans">
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Header />
 
         <main>
-          <form onSubmit={handleSubmit} className="mb-8 space-y-6">
+          <form onSubmit={handleSubmit} className="mb-8 space-y-6 bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <div>
+              <label className="text-zinc-400 mb-2 block font-medium">1. 식물 사진</label>
               <input
                 type="file"
                 accept="image/*"
@@ -190,29 +191,31 @@ const App: React.FC = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading}
-                className="w-full h-48 flex flex-col items-center justify-center p-4 bg-slate-800 border-2 border-dashed border-slate-600 rounded-lg cursor-pointer hover:bg-slate-700 hover:border-green-500 transition-colors"
+                className="w-full h-48 flex flex-col items-center justify-center p-4 bg-zinc-800/50 border border-zinc-700 rounded-xl cursor-pointer hover:bg-zinc-800 hover:border-emerald-500 transition-all duration-300 group"
               >
                 {imagePreview ? (
-                  <img src={imagePreview} alt="Plant preview" className="max-h-full max-w-full rounded-md object-contain" />
+                  <img src={imagePreview} alt="Plant preview" className="max-h-full max-w-full rounded-lg object-contain" />
                 ) : (
-                  <div className="text-center text-slate-400">
+                  <div className="text-center text-zinc-500 group-hover:text-emerald-400 transition-colors">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mx-auto mb-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                     </svg>
-                    <p>사진을 업로드하려면 클릭하세요</p>
-                    <p className="text-sm">(.jpg, .png, .webp)</p>
+                    <p className="font-semibold">사진을 업로드하려면 클릭하세요</p>
+                    <p className="text-sm text-zinc-600 group-hover:text-emerald-500">(.jpg, .png, .webp)</p>
                   </div>
                 )}
               </button>
             </div>
             
-            <div className="relative">
+            <div>
+              <label htmlFor="question-input" className="text-zinc-400 mb-2 block font-medium">2. 추가 질문 (선택)</label>
               <input
+                id="question-input"
                 type="text"
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
-                placeholder="궁금한 점을 물어보세요 (선택 사항)"
-                className="w-full p-4 bg-slate-800 border border-slate-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none transition-colors"
+                placeholder="예: 잎이 자꾸 노랗게 변해요"
+                className="w-full p-4 bg-zinc-800 border border-zinc-700 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-colors"
                 disabled={isLoading}
               />
             </div>
@@ -220,16 +223,16 @@ const App: React.FC = () => {
             <button
                 type="submit"
                 disabled={isLoading || !imageFile}
-                className="w-full px-6 py-3 bg-green-600 text-white font-bold text-lg rounded-lg hover:bg-green-700 disabled:bg-slate-600 disabled:cursor-not-allowed transition-all transform hover:scale-105"
+                className="w-full px-6 py-4 bg-emerald-600 text-white font-bold text-lg rounded-xl hover:bg-emerald-700 active:bg-emerald-800 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed transition-all transform hover:scale-[1.02] active:scale-100"
             >
-                AI 진단받기
+                {isLoading ? '분석 중...' : 'AI 진단받기'}
             </button>
           </form>
 
           {isLoading && <LoadingSpinner />}
           {error && <ErrorDisplay message={error} />}
           {analysis && (
-            <>
+            <div className="space-y-8">
               <AnalysisResult
                 analysis={analysis}
                 onColorChange={handleColorChange}
@@ -248,7 +251,7 @@ const App: React.FC = () => {
                   isLoading={isChatLoading}
                 />
               )}
-            </>
+            </div>
           )}
           
         </main>
