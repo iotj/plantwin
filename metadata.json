@@ -1,0 +1,5 @@
+{
+  "name": "AI 식물 집사",
+  "description": "AI로 식물을 진단하고, 사진과 함께 성장 일기를 기록하며 맞춤 관리 가이드를 받아보세요.",
+  "requestFramePermissions": []
+}
