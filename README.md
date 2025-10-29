@@ -1,20 +1,54 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# AI 식물 집사
 
-# Run and deploy your AI Studio app
+AI로 식물을 진단하고, 사진과 함께 성장 일기를 기록하며 맞춤 관리 가이드를 받아보세요.
 
-This contains everything you need to run your app locally.
+## ✨ 주요 기능
 
-View your app in AI Studio: https://ai.studio/apps/drive/1wKj8uUSmHDmAErN_vwvbXhz4h8h6iCMk
+-   **📸 AI 사진 분석 진단**: 식물 사진 한 장으로 식물의 종류, 건강 상태, 수분 및 일조량 등을 정밀하게 분석합니다.
+-   **📝 맞춤 관리 가이드**: AI 분석 결과를 바탕으로 물주기, 햇빛, 가지치기 등 식물에 꼭 맞는 관리 방법을 추천합니다.
+-   **📔 성장 일기**: 진단받은 식물을 등록하고, 시간의 흐름에 따른 변화를 사진과 함께 기록하여 성장 과정을 한눈에 볼 수 있습니다.
+-   **💬 AI 챗봇 상담**: 진단 결과에 대해 궁금한 점을 AI 식물 전문가에게 바로 질문하고 답변을 받을 수 있습니다.
+-   **🎨 특수 기능**:
+    -   **꽃 색깔 예측**: 수국처럼 흙의 산도에 따라 색이 변하는 식물의 경우, 원하는 색으로 꽃을 피우는 방법을 안내하고 AI로 미리보기 이미지를 생성합니다.
+    -   **개화 모습 시뮬레이션**: 아직 꽃이 피지 않은 식물이 만개했을 때의 모습을 다양한 색상으로 미리 볼 수 있습니다.
 
-## Run Locally
+## 🚀 사용 방법
 
-**Prerequisites:**  Node.js
+1.  **사진 업로드**: '홈 화면'에서 진단받고 싶은 식물 사진을 업로드합니다.
+2.  **질문 입력 (선택 사항)**: 잎이 노랗게 변하는 등 특별히 궁금한 점이 있다면 질문을 입력합니다.
+3.  **진단 받기**: 'AI 진단받기' 버튼을 클릭하여 분석을 시작합니다.
+4.  **결과 확인**: 잠시 후 AI가 분석한 상세 결과를 확인합니다.
+5.  **식물 등록 및 일기 작성**: 진단 결과가 마음에 들면 '반려 식물로 등록'하여 나만의 성장 일기를 시작할 수 있습니다.
+6.  **추가 질문**: 결과 화면 하단의 챗봇을 통해 더 궁금한 점을 물어보세요.
 
+## 🛠️ 사용 기술
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+-   **Frontend**: React, TypeScript, Tailwind CSS
+-   **AI Model**: Google Gemini API
+    -   `gemini-2.5-flash`: 식물 분석 및 챗봇 기능
+    -   `gemini-2.5-flash-image`: 꽃 색깔 변경 및 개화 시뮬레이션 이미지 생성
+
+## 📂 프로젝트 구조
+
+```
+.
+├── components/         # 리액트 컴포넌트
+│   ├── ChatInterface.tsx
+│   ├── CompanionPlantSidebar.tsx
+│   ├── ErrorDisplay.tsx
+│   ├── Header.tsx
+│   ├── LoadingSpinner.tsx
+│   ├── Menu.tsx
+│   ├── PlantDetail.tsx
+│   ├── PlantList.tsx
+│   └── ToolCard.tsx
+├── services/           # 외부 서비스 연동
+│   ├── geminiService.ts  # Gemini API 호출 로직
+│   └── storageService.ts # 로컬 스토리지를 이용한 데이터 관리
+├── App.tsx             # 메인 애플리케이션 컴포넌트
+├── index.html          # HTML 진입점
+├── index.tsx           # 리액트 렌더링 시작점
+├── metadata.json       # 앱 메타데이터
+├── types.ts            # TypeScript 타입 정의
+└── README.md           # 프로젝트 설명 파일
+```
