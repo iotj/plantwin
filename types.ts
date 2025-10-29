@@ -15,6 +15,10 @@ export interface PlantAnalysis {
   repottingInfo?: string;
   pruningInfoSummary?: string;
   pruningInfo?: string;
+  pestDiseaseInfoSummary?: string;
+  pestDiseaseInfo?: string;
+  hydrationInfoDetail?: string;
+  sunlightInfoDetail?: string;
   colorChangeGuide?: {
     toBlue: string;
     toPink: string;

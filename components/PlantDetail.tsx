@@ -47,6 +47,9 @@ const getNotifications = (plant: Plant): Notification[] => {
     if (analysis.sunlightInfo && (analysis.sunlightInfo.includes('부족') || analysis.sunlightInfo.includes('과다') || analysis.sunlightInfo.includes('강함'))) {
         notifications.push({ text: `광량 조절이 필요해 보여요: ${analysis.sunlightInfo}.`, type: 'info' });
     }
+     if (analysis.pestDiseaseInfo) {
+        notifications.push({ text: '병충해가 의심됩니다. 진단 내용을 확인해보세요.', type: 'warning' });
+    }
     if (analysis.repottingInfo) {
         notifications.push({ text: '분갈이가 필요할 수 있습니다. 진단 내용을 확인해보세요.', type: 'info' });
     }

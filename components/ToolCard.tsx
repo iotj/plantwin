@@ -143,6 +143,14 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
                             colorClass="text-orange-400"
                         />
                       )}
+                       {analysis.pestDiseaseInfoSummary && (
+                        <StatusItem 
+                            icon={<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5"><path fillRule="evenodd" d="M10.022 2.73a.75.75 0 01.512.219l4.5 4.25a.75.75 0 01-.984 1.102l-.02-.021-3.73-3.513a.75.75 0 00-.976 0l-3.73 3.513-.02.02a.75.75 0 11-.984-1.102l4.5-4.25a.75.75 0 01.472-.219zm2.458 5.485a.75.75 0 01.69.043l3.5 2.25a.75.75 0 010 1.284l-3.5 2.25a.75.75 0 11-.734-1.144l2.583-1.66-2.583-1.66a.75.75 0 01.044-1.333zM7.542 8.215a.75.75 0 01.044 1.333L4.999 11.21l2.583 1.66a.75.75 0 11-.734 1.144l-3.5-2.25a.75.75 0 010-1.284l3.5-2.25a.75.75 0 01.69-.043z" clipRule="evenodd" /></svg>}
+                            label="병충해 정보"
+                            value={analysis.pestDiseaseInfoSummary} 
+                            colorClass="text-orange-400"
+                        />
+                      )}
                   </div>
               </div>
               <div className="border-t border-zinc-800"></div>
@@ -184,9 +192,12 @@ const AnalysisResult: React.FC<AnalysisResultProps> = ({
       </div>
 
       {[
+        { info: analysis.hydrationInfoDetail, title: '수분 상태', icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path fillRule="evenodd" d="M10 1a5.5 5.5 0 00-5.465 6.435L10 18l5.465-10.565A5.5 5.5 0 0010 1zm0 3.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z" clipRule="evenodd" /></svg> },
+        { info: analysis.sunlightInfoDetail, title: '일조량', icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM10 15a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 15zM10 7a3 3 0 100 6 3 3 0 000-6zM15.657 4.343a.75.75 0 010 1.06l-1.06 1.061a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zm-9.192 9.192a.75.75 0 010 1.06l-1.06 1.06a.75.75 0 01-1.06-1.06l1.06-1.06a.75.75 0 011.06 0zM4.343 4.343a.75.75 0 011.06 0l1.06 1.061a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zm9.192 9.192a.75.75 0 011.06 0l1.06 1.06a.75.75 0 01-1.06 1.06l-1.06-1.06a.75.75 0 010-1.06zM2 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 012 10zM15 10a.75.75 0 01.75-.75h1.5a.75.75 0 010 1.5h-1.5A.75.75 0 0115 10z" /></svg> },
         { info: analysis.harvestInfo, title: '수확 정보', icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path fillRule="evenodd" d="M5.75 2a.75.75 0 01.75.75V4h7V2.75a.75.75 0 011.5 0V4h.25A2.75 2.75 0 0118 6.75v8.5A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25v-8.5A2.75 2.75 0 014.75 4H5V2.75A.75.75 0 015.75 2zM4.5 8.5a.75.75 0 000 1.5h11a.75.75 0 000-1.5h-11zM10 12a.75.75 0 01.75.75v.008a.75.75 0 01-1.5 0V12.75A.75.75 0 0110 12z" clipRule="evenodd" /></svg> },
         { info: analysis.repottingInfo, title: '분갈이 필요성', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21 3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" /></svg> },
         { info: analysis.pruningInfo, title: '가지치기 필요성', icon: <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 011.622-3.385m5.043.025a15.998 15.998 0 001.622-3.385m3.388 1.62a15.998 15.998 0 00-1.622-3.385m-5.043-.025a15.998 15.998 0 01-3.388-1.621m7.447 1.027a3 3 0 00-5.78-1.128 2.25 2.25 0 01-2.4-2.245 4.5 4.5 0 008.4 2.245c0 .399-.078.78-.22 1.128zm0 0a15.998 15.998 0 00-3.388 1.622m5.043.025a15.998 15.998 0 01-1.622 3.385m-5.043-.025a15.998 15.998 0 00-1.622 3.385m-3.388-1.622a15.998 15.998 0 001.622 3.385" /></svg> },
+        { info: analysis.pestDiseaseInfo, title: '병충해 정보', icon: <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 mr-2 text-emerald-400"><path fillRule="evenodd" d="M10.022 2.73a.75.75 0 01.512.219l4.5 4.25a.75.75 0 01-.984 1.102l-.02-.021-3.73-3.513a.75.75 0 00-.976 0l-3.73 3.513-.02.02a.75.75 0 11-.984-1.102l4.5-4.25a.75.75 0 01.472-.219zm2.458 5.485a.75.75 0 01.69.043l3.5 2.25a.75.75 0 010 1.284l-3.5 2.25a.75.75 0 11-.734-1.144l2.583-1.66-2.583-1.66a.75.75 0 01.044-1.333zM7.542 8.215a.75.75 0 01.044 1.333L4.999 11.21l2.583 1.66a.75.75 0 11-.734 1.144l-3.5-2.25a.75.75 0 010-1.284l3.5-2.25a.75.75 0 01.69-.043z" clipRule="evenodd" /></svg> },
       ].map((section) => section.info && (
         <div key={section.title} className="border-t border-zinc-800 pt-6">
           <h3 className="text-lg font-semibold text-zinc-100 mb-3 flex items-center">{section.icon}{section.title}</h3>
