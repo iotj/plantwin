@@ -2,6 +2,31 @@
 
 AI로 식물을 진단하고, 사진과 함께 성장 일기를 기록하며 맞춤 관리 가이드를 받아보세요.
 
+## 📦 로컬 환경에서 실행하기 (Vite + npm)
+
+1.  **종속성 설치**:
+    -   프로젝트 폴더에서 다음 명령어를 실행하여 필요한 패키지를 설치합니다.
+    ```bash
+    npm install
+    ```
+
+2.  **환경 변수 설정**:
+    -   프로젝트 루트에 있는 `.env.example` 파일을 복사하여 `.env` 파일을 생성합니다.
+        ```bash
+        cp .env.example .env
+        ```
+    -   생성된 `.env` 파일을 열고, [Google AI Studio](https://aistudio.google.com/app/apikey)에서 발급받은 본인의 Gemini API 키를 입력합니다.
+        ```
+        VITE_API_KEY="YOUR_GEMINI_API_KEY"
+        ```
+
+3.  **개발 서버 실행**:
+    ```bash
+    npm run dev
+    ```
+    -   서버가 실행되면 터미널에 표시된 로컬 주소(예: `http://localhost:5173`)로 접속하여 앱을 확인할 수 있습니다.
+
+
 ## ✨ 주요 기능
 
 -   **📸 AI 사진 분석 진단**: 식물 사진 한 장으로 식물의 종류, 건강 상태, 수분 및 일조량 등을 정밀하게 분석합니다.
@@ -12,18 +37,9 @@ AI로 식물을 진단하고, 사진과 함께 성장 일기를 기록하며 맞
     -   **꽃 색깔 예측**: 수국처럼 흙의 산도에 따라 색이 변하는 식물의 경우, 원하는 색으로 꽃을 피우는 방법을 안내하고 AI로 미리보기 이미지를 생성합니다.
     -   **개화 모습 시뮬레이션**: 아직 꽃이 피지 않은 식물이 만개했을 때의 모습을 다양한 색상으로 미리 볼 수 있습니다.
 
-## 🚀 사용 방법
-
-1.  **사진 업로드**: '홈 화면'에서 진단받고 싶은 식물 사진을 업로드합니다.
-2.  **질문 입력 (선택 사항)**: 잎이 노랗게 변하는 등 특별히 궁금한 점이 있다면 질문을 입력합니다.
-3.  **진단 받기**: 'AI 진단받기' 버튼을 클릭하여 분석을 시작합니다.
-4.  **결과 확인**: 잠시 후 AI가 분석한 상세 결과를 확인합니다.
-5.  **식물 등록 및 일기 작성**: 진단 결과가 마음에 들면 '반려 식물로 등록'하여 나만의 성장 일기를 시작할 수 있습니다.
-6.  **추가 질문**: 결과 화면 하단의 챗봇을 통해 더 궁금한 점을 물어보세요.
-
 ## 🛠️ 사용 기술
 
--   **Frontend**: React, TypeScript, Tailwind CSS
+-   **Frontend**: React, TypeScript, Vite, Tailwind CSS
 -   **AI Model**: Google Gemini API
     -   `gemini-2.5-flash`: 식물 분석 및 챗봇 기능
     -   `gemini-2.5-flash-image`: 꽃 색깔 변경 및 개화 시뮬레이션 이미지 생성
@@ -32,23 +48,19 @@ AI로 식물을 진단하고, 사진과 함께 성장 일기를 기록하며 맞
 
 ```
 .
-├── components/         # 리액트 컴포넌트
-│   ├── ChatInterface.tsx
-│   ├── CompanionPlantSidebar.tsx
-│   ├── ErrorDisplay.tsx
-│   ├── Header.tsx
-│   ├── LoadingSpinner.tsx
-│   ├── Menu.tsx
-│   ├── PlantDetail.tsx
-│   ├── PlantList.tsx
-│   └── ToolCard.tsx
-├── services/           # 외부 서비스 연동
-│   ├── geminiService.ts  # Gemini API 호출 로직
-│   └── storageService.ts # 로컬 스토리지를 이용한 데이터 관리
-├── App.tsx             # 메인 애플리케이션 컴포넌트
+├── src/
+│   ├── components/         # 리액트 컴포넌트
+│   ├── services/           # 외부 서비스 연동
+│   ├── App.tsx             # 메인 애플리케이션 컴포넌트
+│   ├── index.css           # Tailwind CSS 진입점
+│   ├── index.tsx           # 리액트 렌더링 시작점
+│   └── types.ts            # TypeScript 타입 정의
+├── .env.example        # 환경 변수 예시 파일
 ├── index.html          # HTML 진입점
-├── index.tsx           # 리액트 렌더링 시작점
-├── metadata.json       # 앱 메타데이터
-├── types.ts            # TypeScript 타입 정의
+├── package.json        # npm 패키지 및 스크립트 정의
+├── postcss.config.js   # PostCSS 설정
+├── tailwind.config.js  # Tailwind CSS 설정
+├── tsconfig.json       # TypeScript 설정
+├── vite.config.ts      # Vite 설정
 └── README.md           # 프로젝트 설명 파일
 ```
